@@ -91,21 +91,19 @@ namespace JwtWebApi.Controllers
                 signingCredentials: creds);
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-
-            //TEST
-            var validationResult = ValidateToken(jwt);
-
             return jwt;
         }
 
-        private string? ValidateToken(string token)
+
+        [HttpPost("validateToken")]
+        public async Task<ActionResult<UserDetailsModel>> ValidateToken(string token)
         {
             if (token == null)
                 return null;
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
-                _configuration.GetSection("AppSettings:Token").Value));
+            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8
+                .GetBytes(_configuration.GetSection("AppSettings:Token").Value));
             try
             {
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
@@ -129,12 +127,12 @@ namespace JwtWebApi.Controllers
                 var user = new ClaimsPrincipal(identity);
 
 
-                return user.FindFirstValue(ClaimTypes.Name);
+                return Ok($"Token valid for username {user.FindFirstValue(ClaimTypes.Name)}");
             }
             catch
             {
                 //failed
-                return null;
+                return BadRequest("Token invalid");
             }
         }
 
