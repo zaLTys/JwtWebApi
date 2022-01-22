@@ -81,7 +81,7 @@ namespace JwtWebApi.Controllers
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
-                _configuration.GetSection("AppSettings:Token").Value));
+                _configuration.GetSection("AppSettings:JwtSecretKey").Value));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
@@ -103,7 +103,7 @@ namespace JwtWebApi.Controllers
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8
-                .GetBytes(_configuration.GetSection("AppSettings:Token").Value));
+                .GetBytes(_configuration.GetSection("AppSettings:JwtSecretKey").Value));
             try
             {
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
