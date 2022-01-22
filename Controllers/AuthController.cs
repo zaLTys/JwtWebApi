@@ -48,7 +48,7 @@ namespace JwtWebApi.Controllers
 
             string token = CreateToken(_user);
 
-            return Ok("My TKN");
+            return Ok(token);
         }
 
         private string CreateToken(User user)
