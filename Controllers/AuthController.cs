@@ -92,7 +92,50 @@ namespace JwtWebApi.Controllers
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
+            //TEST
+            var validationResult = ValidateToken(jwt);
+
             return jwt;
+        }
+
+        private string? ValidateToken(string token)
+        {
+            if (token == null)
+                return null;
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
+                _configuration.GetSection("AppSettings:Token").Value));
+            try
+            {
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = key,
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    // expire exactly  (instead of 5 minutes later)
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+
+                var jwtToken = (JwtSecurityToken)validatedToken;
+                //Initial testing:
+                var values = jwtToken.Claims.Select(x => x.Value).ToList();
+                var types = jwtToken.Claims.Select(x => x.Type).ToList();
+
+                //Better alternative:
+                var claims = JwtParser.ParseClaimsFromJwt(token);
+                var identity = new ClaimsIdentity(claims, "jwt");
+                var user = new ClaimsPrincipal(identity);
+
+
+                return user.FindFirstValue(ClaimTypes.Name);
+            }
+            catch
+            {
+                //failed
+                return null;
+            }
         }
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
